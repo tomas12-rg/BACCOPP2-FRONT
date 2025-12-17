@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { ALLOWED_ROLES } from './constants/roles';
+import { ALLOWED_ROLES, ADMIN_ONLY_ROLES } from './constants/roles';
 
 // Mock de localStorage
 const mockLocalStorage = () => {
@@ -50,6 +50,22 @@ describe('ProtectedRoute - Role-Based Access Control', () => {
     expect(stored.rol).toBe('ADMINISTRADOR');
   });
 
+  test('ADMIN can access Dashboard', () => {
+    const adminUser = {
+      id: 1,
+      username: 'bacco44',
+      rol: 'ADMIN',
+      nombre: 'Admin User',
+      email: 'admin@test.com'
+    };
+    
+    localStorage.setItem('usuario', JSON.stringify(adminUser));
+    
+    const stored = JSON.parse(localStorage.getItem('usuario'));
+    expect(stored.rol).toBe('ADMIN');
+    expect(ALLOWED_ROLES.includes(stored.rol)).toBe(true);
+  });
+
   test('SUPERVISOR can access Dashboard', () => {
     const supervisorUser = {
       id: 2,
@@ -85,8 +101,41 @@ describe('ProtectedRoute - Role-Based Access Control', () => {
 
   test('Role validation logic works correctly', () => {
     expect(ALLOWED_ROLES.includes('ADMINISTRADOR')).toBe(true);
+    expect(ALLOWED_ROLES.includes('ADMIN')).toBe(true);
     expect(ALLOWED_ROLES.includes('SUPERVISOR')).toBe(true);
     expect(ALLOWED_ROLES.includes('VENDEDOR')).toBe(false);
     expect(ALLOWED_ROLES.includes('OTHER_ROLE')).toBe(false);
+  });
+});
+
+describe('AdminOnlyRoute - Admin-Only Access Control', () => {
+  test('ADMINISTRADOR is in ADMIN_ONLY_ROLES', () => {
+    expect(ADMIN_ONLY_ROLES.includes('ADMINISTRADOR')).toBe(true);
+  });
+
+  test('ADMIN is in ADMIN_ONLY_ROLES', () => {
+    expect(ADMIN_ONLY_ROLES.includes('ADMIN')).toBe(true);
+  });
+
+  test('SUPERVISOR is NOT in ADMIN_ONLY_ROLES', () => {
+    expect(ADMIN_ONLY_ROLES.includes('SUPERVISOR')).toBe(false);
+  });
+
+  test('VENDEDOR is NOT in ADMIN_ONLY_ROLES', () => {
+    expect(ADMIN_ONLY_ROLES.includes('VENDEDOR')).toBe(false);
+  });
+
+  test('Only ADMIN and ADMINISTRADOR can access Usuarios page', () => {
+    const roles = ['ADMIN', 'ADMINISTRADOR', 'SUPERVISOR', 'VENDEDOR'];
+    
+    roles.forEach(rol => {
+      const canAccess = ADMIN_ONLY_ROLES.includes(rol);
+      
+      if (rol === 'ADMIN' || rol === 'ADMINISTRADOR') {
+        expect(canAccess).toBe(true);
+      } else {
+        expect(canAccess).toBe(false);
+      }
+    });
   });
 });

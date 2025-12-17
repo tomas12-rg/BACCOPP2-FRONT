@@ -8,11 +8,20 @@ import Usuarios from './pages/Usuarios';
 import Reportes from './pages/Reportes';
 import Caja from './pages/Caja';
 import Sidebar from './components/Sidebar';
-import { ALLOWED_ROLES } from './constants/roles';
+import { ALLOWED_ROLES, ADMIN_ONLY_ROLES } from './constants/roles';
 
 // Componente para proteger rutas según el rol del usuario
 function ProtectedRoute({ children, usuario }) {
   if (!usuario || !ALLOWED_ROLES.includes(usuario.rol)) {
+    return <Navigate to="/ventas" replace />;
+  }
+  
+  return children;
+}
+
+// Componente para proteger rutas solo para administradores
+function AdminOnlyRoute({ children, usuario }) {
+  if (!usuario || !ADMIN_ONLY_ROLES.includes(usuario.rol)) {
     return <Navigate to="/ventas" replace />;
   }
   
@@ -72,7 +81,14 @@ function App() {
             />
             <Route path="/caja" element={<Caja />} />
             <Route path="/ventas" element={<Ventas />} />
-            <Route path="/usuarios" element={<Usuarios />} />
+            <Route 
+              path="/usuarios" 
+              element={
+                <AdminOnlyRoute usuario={usuario}>
+                  <Usuarios />
+                </AdminOnlyRoute>
+              } 
+            />
             <Route path="/productos" element={<Productos />} />
             <Route 
               path="/reportes" 
