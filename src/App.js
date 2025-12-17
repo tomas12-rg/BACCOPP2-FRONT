@@ -8,9 +8,7 @@ import Usuarios from './pages/Usuarios';
 import Reportes from './pages/Reportes';
 import Caja from './pages/Caja';
 import Sidebar from './components/Sidebar';
-
-// Roles permitidos para acceder a rutas protegidas
-const ALLOWED_ROLES = ['ADMINISTRADOR', 'SUPERVISOR'];
+import { ALLOWED_ROLES } from './constants/roles';
 
 // Componente para proteger rutas según el rol del usuario
 function ProtectedRoute({ children, usuario }) {

@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { ALLOWED_ROLES } from './constants/roles';
 
 // Mock de localStorage
 const mockLocalStorage = () => {
@@ -79,16 +80,13 @@ describe('ProtectedRoute - Role-Based Access Control', () => {
     expect(stored.rol).toBe('VENDEDOR');
     
     // Verify that VENDEDOR is not in the allowed roles list
-    const allowedRoles = ['ADMINISTRADOR', 'SUPERVISOR'];
-    expect(allowedRoles.includes(stored.rol)).toBe(false);
+    expect(ALLOWED_ROLES.includes(stored.rol)).toBe(false);
   });
 
   test('Role validation logic works correctly', () => {
-    const allowedRoles = ['ADMINISTRADOR', 'SUPERVISOR'];
-    
-    expect(allowedRoles.includes('ADMINISTRADOR')).toBe(true);
-    expect(allowedRoles.includes('SUPERVISOR')).toBe(true);
-    expect(allowedRoles.includes('VENDEDOR')).toBe(false);
-    expect(allowedRoles.includes('OTHER_ROLE')).toBe(false);
+    expect(ALLOWED_ROLES.includes('ADMINISTRADOR')).toBe(true);
+    expect(ALLOWED_ROLES.includes('SUPERVISOR')).toBe(true);
+    expect(ALLOWED_ROLES.includes('VENDEDOR')).toBe(false);
+    expect(ALLOWED_ROLES.includes('OTHER_ROLE')).toBe(false);
   });
 });

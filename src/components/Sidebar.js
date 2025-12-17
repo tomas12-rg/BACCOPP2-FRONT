@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { ALLOWED_ROLES } from "../constants/roles";
 
 const items = [
   { icon: "🏠", label: "Dashboard", path: "/dashboard", enabled: true },
@@ -22,8 +23,8 @@ export default function Sidebar({ onLogout, usuario }) {
   const getFilteredItems = () => {
     if (!usuario) return items;
     
-    // Si el usuario es VENDEDOR, ocultar Dashboard y Reportes
-    if (usuario.rol === 'VENDEDOR') {
+    // Si el usuario NO tiene rol permitido (es VENDEDOR u otro), ocultar Dashboard y Reportes
+    if (!ALLOWED_ROLES.includes(usuario.rol)) {
       return items.filter(item => item.label !== 'Dashboard' && item.label !== 'Reportes');
     }
     
