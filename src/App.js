@@ -8,7 +8,25 @@ import Usuarios from './pages/Usuarios';
 import Reportes from './pages/Reportes';
 import Caja from './pages/Caja';
 import Sidebar from './components/Sidebar';
+import { ALLOWED_ROLES, ADMIN_ONLY_ROLES } from './constants/roles';
 
+// Componente para proteger rutas según el rol del usuario
+function ProtectedRoute({ children, usuario }) {
+  if (!usuario || !ALLOWED_ROLES.includes(usuario.rol)) {
+    return <Navigate to="/ventas" replace />;
+  }
+  
+  return children;
+}
+
+// Componente para proteger rutas solo para administradores
+function AdminOnlyRoute({ children, usuario }) {
+  if (!usuario || !ADMIN_ONLY_ROLES.includes(usuario.rol)) {
+    return <Navigate to="/ventas" replace />;
+  }
+  
+  return children;
+}
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -38,20 +56,49 @@ function App() {
     return <Login onLogin={handleLogin} />;
   }
 
+  // Determinar la ruta inicial según el rol del usuario
+  const getDefaultRoute = () => {
+    if (usuario && ALLOWED_ROLES.includes(usuario.rol)) {
+      return '/dashboard';
+    }
+    return '/ventas';
+  };
+
   return (
     <Router>
       <div style={{ display: 'flex' }}>
         <Sidebar onLogout={handleLogout} usuario={usuario} />
         <div style={{ flex: 1, background: '#f5f5f5', minHeight: '100vh' }}>
           <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/" element={<Navigate to={getDefaultRoute()} />} />
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute usuario={usuario}>
+                  <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
             <Route path="/caja" element={<Caja />} />
             <Route path="/ventas" element={<Ventas />} />
-            <Route path="/usuarios" element={<Usuarios />} />
+            <Route 
+              path="/usuarios" 
+              element={
+                <AdminOnlyRoute usuario={usuario}>
+                  <Usuarios />
+                </AdminOnlyRoute>
+              } 
+            />
             <Route path="/productos" element={<Productos />} />
-            <Route path="/reportes" element={<Reportes />} />
-            <Route path="*" element={<Navigate to="/dashboard" />} />
+            <Route 
+              path="/reportes" 
+              element={
+                <ProtectedRoute usuario={usuario}>
+                  <Reportes />
+                </ProtectedRoute>
+              } 
+            />
+            <Route path="*" element={<Navigate to={getDefaultRoute()} />} />
           </Routes>
         </div>
       </div>

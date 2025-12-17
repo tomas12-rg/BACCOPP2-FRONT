@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { ALLOWED_ROLES, ADMIN_ONLY_ROLES } from "../constants/roles";
 
 const items = [
   { icon: "🏠", label: "Dashboard", path: "/dashboard", enabled: true },
@@ -17,6 +18,27 @@ const items = [
 export default function Sidebar({ onLogout, usuario }) {
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Filtrar items según el rol del usuario
+  const getFilteredItems = () => {
+    if (!usuario) return items;
+    
+    let filteredList = items;
+    
+    // Si el usuario NO tiene rol permitido (es VENDEDOR u otro), ocultar Dashboard y Reportes
+    if (!ALLOWED_ROLES.includes(usuario.rol)) {
+      filteredList = filteredList.filter(item => item.label !== 'Dashboard' && item.label !== 'Reportes');
+    }
+    
+    // Si el usuario NO es ADMIN, ocultar Usuarios
+    if (!ADMIN_ONLY_ROLES.includes(usuario.rol)) {
+      filteredList = filteredList.filter(item => item.label !== 'Usuarios');
+    }
+    
+    return filteredList;
+  };
+
+  const filteredItems = getFilteredItems();
 
   const handleItemClick = (item) => {
     if (item.enabled) {
@@ -64,7 +86,7 @@ export default function Sidebar({ onLogout, usuario }) {
       )}
 
       <nav style={{ flex: 1 }}>
-        {items.map(item => {
+        {filteredItems.map(item => {
           const isActive = location.pathname === item.path && item.enabled;
           const isDisabled = !item.enabled;
           
