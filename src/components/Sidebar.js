@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ALLOWED_ROLES } from "../constants/roles";
+import { ALLOWED_ROLES, ADMIN_ONLY_ROLES } from "../constants/roles";
 
 const items = [
   { icon: "🏠", label: "Dashboard", path: "/dashboard", enabled: true },
@@ -23,12 +23,21 @@ export default function Sidebar({ onLogout, usuario }) {
   const getFilteredItems = () => {
     if (!usuario) return items;
     
-    // Si el usuario NO tiene rol permitido (es VENDEDOR u otro), ocultar Dashboard y Reportes
-    if (!ALLOWED_ROLES.includes(usuario.rol)) {
-      return items.filter(item => item.label !== 'Dashboard' && item.label !== 'Reportes');
+    // Si NO es ADMIN, aplicar filtros
+    if (!ADMIN_ONLY_ROLES.includes(usuario.rol)) {
+      // Si es SUPERVISOR: mostrar Dashboard y Reportes, ocultar Usuarios
+      if (ALLOWED_ROLES.includes(usuario.rol)) {
+        return items.filter(item => item.label !== 'Usuarios');
+      }
+      // Si es VENDEDOR: ocultar Dashboard, Reportes y Usuarios
+      return items.filter(item => 
+        item.label !== 'Dashboard' && 
+        item.label !== 'Reportes' && 
+        item.label !== 'Usuarios'
+      );
     }
     
-    // Para ADMINISTRADOR y SUPERVISOR, mostrar todos los items
+    // Para ADMIN: mostrar todos los items
     return items;
   };
 
