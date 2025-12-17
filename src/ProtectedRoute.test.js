@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { ALLOWED_ROLES } from './constants/roles';
+import { ALLOWED_ROLES, ADMIN_ONLY_ROLES } from './constants/roles';
 
 // Mock de localStorage
 const mockLocalStorage = () => {
@@ -85,8 +85,48 @@ describe('ProtectedRoute - Role-Based Access Control', () => {
 
   test('Role validation logic works correctly', () => {
     expect(ALLOWED_ROLES.includes('ADMINISTRADOR')).toBe(true);
+    expect(ALLOWED_ROLES.includes('ADMIN')).toBe(true);
     expect(ALLOWED_ROLES.includes('SUPERVISOR')).toBe(true);
     expect(ALLOWED_ROLES.includes('VENDEDOR')).toBe(false);
     expect(ALLOWED_ROLES.includes('OTHER_ROLE')).toBe(false);
+  });
+
+  test('ADMIN role can access Dashboard', () => {
+    const adminUser = {
+      id: 4,
+      username: 'bacco44',
+      rol: 'ADMIN',
+      nombre: 'Admin User',
+      email: 'bacco44@test.com'
+    };
+    
+    localStorage.setItem('usuario', JSON.stringify(adminUser));
+    
+    const stored = JSON.parse(localStorage.getItem('usuario'));
+    expect(stored.rol).toBe('ADMIN');
+    expect(ALLOWED_ROLES.includes(stored.rol)).toBe(true);
+  });
+
+  test('Admin-only role validation works correctly', () => {
+    expect(ADMIN_ONLY_ROLES.includes('ADMINISTRADOR')).toBe(true);
+    expect(ADMIN_ONLY_ROLES.includes('ADMIN')).toBe(true);
+    expect(ADMIN_ONLY_ROLES.includes('SUPERVISOR')).toBe(false);
+    expect(ADMIN_ONLY_ROLES.includes('VENDEDOR')).toBe(false);
+  });
+
+  test('SUPERVISOR should not have admin-only access', () => {
+    const supervisorUser = {
+      id: 5,
+      username: 'supervisor',
+      rol: 'SUPERVISOR',
+      nombre: 'Supervisor User',
+      email: 'supervisor@test.com'
+    };
+    
+    localStorage.setItem('usuario', JSON.stringify(supervisorUser));
+    
+    const stored = JSON.parse(localStorage.getItem('usuario'));
+    expect(ALLOWED_ROLES.includes(stored.rol)).toBe(true);
+    expect(ADMIN_ONLY_ROLES.includes(stored.rol)).toBe(false);
   });
 });
