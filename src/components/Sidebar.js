@@ -18,6 +18,21 @@ export default function Sidebar({ onLogout, usuario }) {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Filtrar items según el rol del usuario
+  const getFilteredItems = () => {
+    if (!usuario) return items;
+    
+    // Si el usuario es VENDEDOR, ocultar Dashboard y Reportes
+    if (usuario.rol === 'VENDEDOR') {
+      return items.filter(item => item.label !== 'Dashboard' && item.label !== 'Reportes');
+    }
+    
+    // Para ADMINISTRADOR y SUPERVISOR, mostrar todos los items
+    return items;
+  };
+
+  const filteredItems = getFilteredItems();
+
   const handleItemClick = (item) => {
     if (item.enabled) {
       navigate(item.path);
@@ -64,7 +79,7 @@ export default function Sidebar({ onLogout, usuario }) {
       )}
 
       <nav style={{ flex: 1 }}>
-        {items.map(item => {
+        {filteredItems.map(item => {
           const isActive = location.pathname === item.path && item.enabled;
           const isDisabled = !item.enabled;
           
