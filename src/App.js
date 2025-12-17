@@ -9,11 +9,12 @@ import Reportes from './pages/Reportes';
 import Caja from './pages/Caja';
 import Sidebar from './components/Sidebar';
 
+// Roles permitidos para acceder a rutas protegidas
+const ALLOWED_ROLES = ['ADMINISTRADOR', 'SUPERVISOR'];
+
 // Componente para proteger rutas según el rol del usuario
 function ProtectedRoute({ children, usuario }) {
-  const allowedRoles = ['ADMINISTRADOR', 'SUPERVISOR'];
-  
-  if (!usuario || !allowedRoles.includes(usuario.rol)) {
+  if (!usuario || !ALLOWED_ROLES.includes(usuario.rol)) {
     return <Navigate to="/ventas" replace />;
   }
   
@@ -50,8 +51,7 @@ function App() {
 
   // Determinar la ruta inicial según el rol del usuario
   const getDefaultRoute = () => {
-    const allowedRoles = ['ADMINISTRADOR', 'SUPERVISOR'];
-    if (usuario && allowedRoles.includes(usuario.rol)) {
+    if (usuario && ALLOWED_ROLES.includes(usuario.rol)) {
       return '/dashboard';
     }
     return '/ventas';
